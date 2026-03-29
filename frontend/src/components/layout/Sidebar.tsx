@@ -29,10 +29,10 @@ export function Sidebar() {
   const status = useMarketStore((state) => state.connectionStatus);
 
   return (
-    <aside className="group/sidebar flex h-screen w-16 shrink-0 flex-col border-r border-[var(--border-dim)] bg-[var(--bg-surface)] transition-all duration-200 hover:w-[220px]">
+    <aside className="flex h-screen w-[220px] shrink-0 flex-col border-r border-[var(--border-dim)] bg-[var(--bg-surface)]">
       <div className="flex h-14 items-center gap-2 border-b border-[var(--border-dim)] px-4">
         <Activity className="size-4 text-[var(--accent-green)]" />
-        <span className="font-display text-xs opacity-0 transition-opacity group-hover/sidebar:opacity-100">
+        <span className="font-display text-xs">
           FintelOS
         </span>
       </div>
@@ -51,7 +51,7 @@ export function Sidebar() {
               )}
             >
               <Icon className="size-4" />
-              <span className="whitespace-nowrap opacity-0 transition-opacity group-hover/sidebar:opacity-100">
+              <span className="whitespace-nowrap">
                 {item.label}
               </span>
             </Link>
@@ -68,7 +68,7 @@ export function Sidebar() {
               status === "reconnecting" && "animate-pulse bg-[var(--accent-amber)]",
             )}
           />
-          <span className="uppercase opacity-0 group-hover/sidebar:opacity-100">Live data {status}</span>
+          <span className="uppercase">Live data {status}</span>
         </div>
       </div>
     </aside>
