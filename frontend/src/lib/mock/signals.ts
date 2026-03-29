@@ -1,0 +1,136 @@
+import { Signal } from "@/lib/types";
+
+export const mockSignals: Signal[] = [
+  {
+    id: "s-1",
+    company: "Tata Motors",
+    symbol: "NSE:TATAMOTORS",
+    trend: "BULLISH",
+    type: "INSIDER BUY",
+    reason: "Director bought ₹4.2Cr, third buy in 30 days.",
+    fullReason:
+      "Director accumulation has persisted across three disclosures with rising ticket size. Delivery volumes rose 18% above 20-day average after filing, often preceding continuation rallies.",
+    confidence: 87,
+    minutesAgo: 2,
+  },
+  {
+    id: "s-2",
+    company: "Reliance Industries",
+    symbol: "NSE:RELIANCE",
+    trend: "BULLISH",
+    type: "BREAKOUT",
+    reason: "Price closed above 4-week resistance with volume expansion.",
+    fullReason:
+      "Breakout above ₹2,942 comes with 1.7x relative volume and strong options support at 2,900 CE unwinding. Momentum and breadth context supports trend continuation probability.",
+    confidence: 81,
+    minutesAgo: 6,
+  },
+  {
+    id: "s-3",
+    company: "HDFC Bank",
+    symbol: "NSE:HDFCBANK",
+    trend: "WATCH",
+    type: "FILING ALERT",
+    reason: "Large institutional holding change filed post-close.",
+    fullReason:
+      "A foreign institutional participant trimmed stake marginally while domestic funds absorbed supply. Net impact neutral so far; watch next two sessions for confirmation direction.",
+    confidence: 63,
+    minutesAgo: 9,
+  },
+  {
+    id: "s-4",
+    company: "Infosys",
+    symbol: "NSE:INFY",
+    trend: "BEARISH",
+    type: "PATTERN",
+    reason: "Head-and-shoulders neckline tested and rejected.",
+    fullReason:
+      "Pattern completion occurred near ₹1,498 with RSI divergence and weak rebound participation. Sector-relative underperformance and options skew suggest downside pressure.",
+    confidence: 76,
+    minutesAgo: 12,
+  },
+  {
+    id: "s-5",
+    company: "ITC",
+    symbol: "NSE:ITC",
+    trend: "BULLISH",
+    type: "BULK DEAL",
+    reason: "Bulk deal absorbed at premium with follow-through.",
+    fullReason:
+      "Two domestic funds accumulated ~0.42% equity in negotiated deals at premium to previous close. Immediate follow-through buying suggests strategic rather than tactical positioning.",
+    confidence: 74,
+    minutesAgo: 18,
+  },
+  {
+    id: "s-6",
+    company: "Adani Ports",
+    symbol: "NSE:ADANIPORTS",
+    trend: "NEUTRAL",
+    type: "NARRATIVE SHIFT",
+    reason: "Logistics policy tailwind emerging; price still range-bound.",
+    fullReason:
+      "Macro narrative has improved due to corridor and infra commentary, but price remains in a broad consolidation. Trigger likely only above range high with confirmation volume.",
+    confidence: 58,
+    minutesAgo: 27,
+  },
+  {
+    id: "s-7",
+    company: "State Bank of India",
+    symbol: "NSE:SBIN",
+    trend: "BULLISH",
+    type: "PATTERN",
+    reason: "Bull flag continuation setup on 1H frame.",
+    fullReason:
+      "Up-leg of 9.2% followed by controlled pullback under declining volume. Break above flag top aligns with trend channel and sector strength breadth.",
+    confidence: 79,
+    minutesAgo: 31,
+  },
+  {
+    id: "s-8",
+    company: "Axis Bank",
+    symbol: "NSE:AXISBANK",
+    trend: "WATCH",
+    type: "EARNINGS SURPRISE",
+    reason: "NII beat but guidance tone mixed.",
+    fullReason:
+      "Quarterly beat came mainly from treasury tailwinds while core margin guidance is conservative. Initial reaction muted; directional follow-through needs breakout from opening range.",
+    confidence: 61,
+    minutesAgo: 38,
+  },
+  {
+    id: "s-9",
+    company: "Larsen & Toubro",
+    symbol: "NSE:LT",
+    trend: "BULLISH",
+    type: "FILING ALERT",
+    reason: "Order inflow disclosure exceeds street expectations.",
+    fullReason:
+      "Order book visibility improved materially after infra and defense wins. Historical response to comparable disclosure clusters indicates 5-10 day drift upside.",
+    confidence: 83,
+    minutesAgo: 45,
+  },
+  {
+    id: "s-10",
+    company: "TCS",
+    symbol: "NSE:TCS",
+    trend: "BEARISH",
+    type: "BREAKOUT",
+    reason: "Breakdown below support band with weak IT basket breadth.",
+    fullReason:
+      "Multi-session support at ₹3,980 gave way with rising put activity and weak peer confirmation. Failed intraday reclaim raises probability of lower support test.",
+    confidence: 72,
+    minutesAgo: 53,
+  },
+  ...Array.from({ length: 10 }, (_, index) => ({
+    id: `s-auto-${index + 11}`,
+    company: ["HUL", "Maruti", "Bajaj Finance", "Asian Paints", "Coal India"][index % 5],
+    symbol: `NSE:${["HINDUNILVR", "MARUTI", "BAJFINANCE", "ASIANPAINT", "COALINDIA"][index % 5]}`,
+    trend: ["BULLISH", "BEARISH", "WATCH", "NEUTRAL"][index % 4] as Signal["trend"],
+    type: ["PATTERN", "FILING ALERT", "BULK DEAL", "NARRATIVE SHIFT"][index % 4] as Signal["type"],
+    reason: "Model flagged an event cluster with elevated relevance.",
+    fullReason:
+      "Cross-source event clustering identified this setup as statistically significant relative to baseline behavior over the last 120 sessions.",
+    confidence: 55 + (index % 5) * 7,
+    minutesAgo: 60 + index * 6,
+  })),
+];
