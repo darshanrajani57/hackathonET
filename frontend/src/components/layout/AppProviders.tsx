@@ -22,6 +22,10 @@ export function AppProviders({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
+    if (useMockData) {
+      useMarketStore.getState().setConnectionStatus("connected");
+    }
+
     const cleanup = useMockData ? undefined : connectMarketWebSocket();
 
     const refresh = async () => {

@@ -4,6 +4,7 @@ import { mockMarketPulse } from "@/lib/mock/prices";
 import { mockSignals } from "@/lib/mock/signals";
 import { DataSourceMode } from "@/lib/api";
 import { MarketPulse, Signal } from "@/lib/types";
+import { useMockData } from "@/lib/utils";
 
 type ConnectionStatus = "connected" | "disconnected" | "reconnecting";
 
@@ -27,7 +28,7 @@ interface MarketStore {
 }
 
 export const useMarketStore = create<MarketStore>((set) => ({
-  connectionStatus: "disconnected",
+  connectionStatus: useMockData ? "connected" : "disconnected",
   lastUpdateAt: new Date().toISOString(),
   latencyMs: 42,
   modelName: "qwen3:8b",
