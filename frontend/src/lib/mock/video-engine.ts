@@ -23,6 +23,8 @@ export interface VideoJob {
   outputUrl?: string;
 }
 
+const DEFAULT_DUMMY_VIDEO_URL = "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+
 export const mockVideoTemplates: VideoTemplate[] = [
   {
     id: "tpl-daily-wrap",
@@ -96,5 +98,6 @@ export const initialVideoJobs: VideoJob[] = [
     durationSec: 34,
     frameLatencyMs: 76,
     createdAt: "Today, 03:52 PM",
+    outputUrl: DEFAULT_DUMMY_VIDEO_URL,
   },
 ];

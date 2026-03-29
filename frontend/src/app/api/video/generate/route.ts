@@ -9,6 +9,9 @@ type GenerateVideoPayload = {
   clientJobId?: string;
 };
 
+const DEFAULT_DUMMY_VIDEO_URL =
+  "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+
 const ALLOWED_TEMPLATES: VideoTemplateType[] = ["DAILY_WRAP", "RACE_CHART", "SECTOR_ROTATION", "FII_DII_FLOW", "IPO_TRACKER"];
 
 type UnknownRecord = Record<string, unknown>;
@@ -199,6 +202,8 @@ export async function POST(request: NextRequest) {
 
     const title = body.title?.trim() || `${templateType} Auto-generated`;
     const strictStockOnly = (process.env.VIDEO_ENGINE_STOCK_ONLY ?? "true").trim().toLowerCase() !== "false";
+    const allowDummyFallback =
+      (process.env.VIDEO_ENGINE_ALLOW_DUMMY_FALLBACK ?? "true").trim().toLowerCase() !== "false";
 
     const renderResult = await callRenderer({
       templateType,
@@ -208,7 +213,15 @@ export async function POST(request: NextRequest) {
     }).catch(() => null);
 
     const configuredDemoUrl = (process.env.VIDEO_ENGINE_DEMO_URL ?? "").trim();
-    const outputUrl = renderResult?.outputUrl || configuredDemoUrl;
+    const configuredDummyUrl = (process.env.VIDEO_ENGINE_DUMMY_URL ?? "").trim();
+
+    let outputUrl = renderResult?.outputUrl || configuredDemoUrl;
+    let usedDummyFallback = false;
+
+    if (!outputUrl && allowDummyFallback) {
+      outputUrl = configuredDummyUrl || DEFAULT_DUMMY_VIDEO_URL;
+      usedDummyFallback = true;
+    }
 
     if (!outputUrl && strictStockOnly) {
       return NextResponse.json({
@@ -221,7 +234,8 @@ export async function POST(request: NextRequest) {
         frameLatencyMs: 0,
         createdAt,
         clientJobId: body.clientJobId,
-        error: "Stock-only mode is enabled. Configure VIDEO_RENDER_API_BASE_URL (recommended) or set VIDEO_ENGINE_DEMO_URL to a stock-market video.",
+        error:
+          "Stock-only mode is enabled. Configure VIDEO_RENDER_API_BASE_URL (recommended), set VIDEO_ENGINE_DEMO_URL, or enable VIDEO_ENGINE_ALLOW_DUMMY_FALLBACK=true.",
       });
     }
 
@@ -236,7 +250,7 @@ export async function POST(request: NextRequest) {
       createdAt,
       outputUrl,
       clientJobId: body.clientJobId,
-      error: outputUrl ? undefined : "No stock-market output URL was produced.",
+      error: outputUrl ? (usedDummyFallback ? "Using demo fallback clip." : undefined) : "No stock-market output URL was produced.",
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected server error";
