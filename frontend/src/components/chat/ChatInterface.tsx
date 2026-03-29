@@ -3,7 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Send } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { MessageBubble } from "@/components/chat/MessageBubble";
 import { ThinkingStream } from "@/components/chat/ThinkingStream";
@@ -20,36 +20,77 @@ const quickActions = [
 ];
 
 export function ChatInterface() {
-  const [threadId, setThreadId] = useState(mockChatThreads[0].id);
-  const [messages, setMessages] = useState<ChatMessage[]>(mockChatThreads[0].messages);
+  const [liveThreadId] = useState(() => `live-${crypto.randomUUID()}`);
+  const [threads, setThreads] = useState(() => [{ id: liveThreadId, title: "Live Chat", messages: [] as ChatMessage[] }, ...mockChatThreads]);
+  const [threadId, setThreadId] = useState(liveThreadId);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
-  const [portfolioContext, setPortfolioContext] = useState(true);
+  const [portfolioContext, setPortfolioContext] = useState(false);
+  const messageListRef = useRef<HTMLDivElement>(null);
 
-  const currentThread = useMemo(() => mockChatThreads.find((thread) => thread.id === threadId) ?? mockChatThreads[0], [threadId]);
+  const currentThread = useMemo(() => threads.find((thread) => thread.id === threadId) ?? threads[0], [threadId, threads]);
+
+  useEffect(() => {
+    const symbol = new URLSearchParams(window.location.search).get("symbol");
+    if (!symbol) return;
+    setInput(`Analyse ${symbol} with latest momentum and filing context`);
+  }, []);
 
   const mutation = useMutation({
     mutationFn: sendChat,
     onSuccess: (response) => {
-      setMessages((prev) => [...prev, response]);
+      setMessages((prev) => {
+        const next = [...prev, response];
+        setThreads((previous) => previous.map((thread) => (thread.id === threadId ? { ...thread, messages: next } : thread)));
+        return next;
+      });
     },
   });
+
+  useEffect(() => {
+    const el = messageListRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [messages, threadId, mutation.isPending]);
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     const text = input.trim();
     if (!text) return;
     const userMessage: ChatMessage = { id: crypto.randomUUID(), role: "user", content: text };
-    setMessages((prev) => [...prev, userMessage]);
+    const nextMessages = [...messages, userMessage];
+    setMessages(nextMessages);
+    setThreads((previous) => previous.map((thread) => (thread.id === threadId ? { ...thread, messages: nextMessages } : thread)));
     setInput("");
-    mutation.mutate(text);
+    mutation.mutate({
+      message: text,
+      threadId,
+      portfolioContext,
+      history: nextMessages.slice(-10).map((item) => ({ role: item.role, content: item.content })),
+    });
+  };
+
+  const onNewChat = () => {
+    const newId = `live-${crypto.randomUUID()}`;
+    const newThread = {
+      id: newId,
+      title: "New Chat",
+      messages: [] as ChatMessage[],
+    };
+    setThreads((previous) => [newThread, ...previous]);
+    setThreadId(newId);
+    setMessages([]);
+    setInput("");
   };
 
   return (
-    <div className="grid h-[calc(100vh-78px)] grid-cols-[280px_1fr] overflow-hidden">
-      <aside className="border-r border-[var(--border-dim)] bg-[var(--bg-surface)] p-3">
-        <NeonButton className="mb-3 w-full">New Chat</NeonButton>
+    <div className="grid h-full min-h-0 grid-cols-[280px_1fr] overflow-hidden">
+      <aside className="min-h-0 overflow-auto border-r border-[var(--border-dim)] bg-[var(--bg-surface)] p-3">
+        <NeonButton className="mb-3 w-full" type="button" onClick={onNewChat}>
+          New Chat
+        </NeonButton>
         <div className="space-y-1">
-          {mockChatThreads.map((thread) => (
+          {threads.map((thread) => (
             <button
               key={thread.id}
               onClick={() => {
@@ -64,8 +105,8 @@ export function ChatInterface() {
         </div>
       </aside>
 
-      <section className="flex h-full flex-col">
-        <div className="scrollbar-terminal flex-1 space-y-3 overflow-auto p-4">
+      <section className="flex min-h-0 h-full flex-col">
+        <div ref={messageListRef} className="scrollbar-terminal flex-1 space-y-3 overflow-auto p-4">
           {messages.map((message) => (
             <motion.div
               key={message.id}
@@ -79,7 +120,7 @@ export function ChatInterface() {
           <ThinkingStream active={mutation.isPending} sourceText="Parsing your question, correlating sector breadth, implied volatility, and filing-backed event clusters before generating the final answer..." />
         </div>
 
-        <form onSubmit={onSubmit} className="border-t border-[var(--border-dim)] bg-[var(--bg-surface)] p-4">
+        <form onSubmit={onSubmit} className="shrink-0 border-t border-[var(--border-dim)] bg-[var(--bg-surface)] p-4">
           <textarea
             value={input}
             onChange={(event) => setInput(event.target.value)}

@@ -1,6 +1,6 @@
 import { useMarketStore } from "@/lib/store/market-store";
 
-const WS_URL = "ws://localhost:8000/ws/market";
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL;
 
 let socket: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -15,6 +15,11 @@ function scheduleReconnect(connect: () => void) {
 
 export function connectMarketWebSocket() {
   if (typeof window === "undefined") {
+    return;
+  }
+
+  if (!WS_URL) {
+    useMarketStore.getState().setConnectionStatus("disconnected");
     return;
   }
 

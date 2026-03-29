@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 import { FilingAlert } from "@/components/radar/FilingAlert";
 import { InsiderTradeRow } from "@/components/radar/InsiderTradeRow";
@@ -9,10 +10,36 @@ import { Select } from "@/components/ui/select";
 import { mockSignals } from "@/lib/mock/signals";
 
 export default function RadarPage() {
+  const router = useRouter();
   const [selectedId, setSelectedId] = useState(mockSignals[0].id);
   const [sector, setSector] = useState("all");
   const [timeRange, setTimeRange] = useState("today");
+  const [watchlist, setWatchlist] = useState<string[]>([]);
   const selected = useMemo(() => mockSignals.find((signal) => signal.id === selectedId) ?? mockSignals[0], [selectedId]);
+
+  useEffect(() => {
+    const cached = window.localStorage.getItem("radar-watchlist");
+    if (cached) {
+      try {
+        setWatchlist(JSON.parse(cached) as string[]);
+      } catch {
+        setWatchlist([]);
+      }
+    }
+  }, []);
+
+  const toggleWatchlist = (symbol: string) => {
+    setWatchlist((previous) => {
+      const next = previous.includes(symbol) ? previous.filter((item) => item !== symbol) : [...previous, symbol];
+      window.localStorage.setItem("radar-watchlist", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const openFiling = (symbol: string) => {
+    const sanitized = symbol.replace("NSE:", "").replace(".NS", "");
+    window.open(`https://www.screener.in/company/${sanitized}/consolidated/`, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <div className="grid h-full grid-cols-[260px_1fr_340px] gap-4 p-4">
@@ -66,9 +93,15 @@ export default function RadarPage() {
 
       <section className="scrollbar-terminal space-y-3 overflow-auto pr-2">
         {mockSignals.slice(0, 10).map((signal) => (
-          <button key={signal.id} onClick={() => setSelectedId(signal.id)} className="block w-full text-left">
-            <SignalCard signal={signal} />
-          </button>
+          <div key={signal.id} onClick={() => setSelectedId(signal.id)} className="block w-full cursor-pointer text-left">
+            <SignalCard
+              signal={signal}
+              watchlisted={watchlist.includes(signal.symbol)}
+              onViewFiling={() => openFiling(signal.symbol)}
+              onToggleWatchlist={() => toggleWatchlist(signal.symbol)}
+              onChat={() => router.push(`/chat?symbol=${encodeURIComponent(signal.symbol)}`)}
+            />
+          </div>
         ))}
       </section>
 

@@ -54,6 +54,8 @@ export function TopBar() {
       <label className="flex w-[420px] items-center gap-2 rounded-md border border-[var(--border-dim)] bg-[var(--bg-card)] px-3 py-1.5 focus-within:border-[var(--border-bright)]">
         <Search className="size-4 text-[var(--text-secondary)]" />
         <input
+          id="stock-search"
+          name="stockSearch"
           className="w-full bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
           placeholder="Search stocks by name/symbol"
         />

@@ -3,7 +3,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode, useEffect, useState } from "react";
 
-import { getMarketPulse, getSignals } from "@/lib/api";
+import { getDataSourceStatus, getMarketPulse, getSignals } from "@/lib/api";
+import { useMarketStore } from "@/lib/store/market-store";
+import { useMockData } from "@/lib/utils";
 import { connectMarketWebSocket } from "@/lib/websocket";
 
 export function AppProviders({ children }: { children: ReactNode }) {
@@ -20,19 +22,29 @@ export function AppProviders({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    const cleanup = connectMarketWebSocket();
+    const cleanup = useMockData ? undefined : connectMarketWebSocket();
 
-    queryClient.prefetchQuery({
-      queryKey: ["signals"],
-      queryFn: getSignals,
-    });
+    const refresh = async () => {
+      const [signals, pulse] = await Promise.all([getSignals(), getMarketPulse()]);
+      const source = getDataSourceStatus();
+      const store = useMarketStore.getState();
+      store.setSignals(signals);
+      store.setPulse(pulse);
+      store.setSourceStatus({
+        signals: source.signals,
+        marketPulse: source.marketPulse,
+      });
+    };
 
-    queryClient.prefetchQuery({
-      queryKey: ["market-pulse"],
-      queryFn: getMarketPulse,
-    });
+    void refresh();
+    const timer = setInterval(() => {
+      void refresh();
+    }, 30_000);
 
-    return () => cleanup?.();
+    return () => {
+      clearInterval(timer);
+      cleanup?.();
+    };
   }, [queryClient]);
 
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;

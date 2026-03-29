@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "reset:dev": "npm --prefix .. run reset:dev",
+    "reset:clean": "npm --prefix .. run reset:clean"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.2.6",
@@ -19,7 +21,9 @@
     "next": "14.2.5",
     "react": "^18",
     "react-dom": "^18",
+    "redis": "^5.11.0",
     "tailwind-merge": "^3.5.0",
+    "tslib": "^2.8.1",
     "zustand": "^5.0.12"
   },
   "devDependencies": {
